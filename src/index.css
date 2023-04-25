@@ -1,0 +1,61 @@
+@import-normalize; /* bring in normalize.css styles */
+
+body {
+  margin: 0;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  background-image: url('./image/sorrow.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+
+
+
+}
+
+code {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+svg {
+  display: block;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+p,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  display: block;
+}
+
+.btn {
+  color: azure;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btn:first-child {
+  margin-right: 12px;
+}
+
+.btn-success {
+  background-color: rgb(21, 153, 21);
+  border: 2px solid rgb(129, 202, 20);
+}
+
+.btn-danger {
+  background-color: rgb(199, 43, 43);
+}
+
