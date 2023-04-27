@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-
 import SearchForm from '../Searchbar/Searchbar';
 import { Gallery } from '../ImageGallery/ImageGallery';
 import { LoadMoreButton } from '../Button/Button';
@@ -21,17 +20,24 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [loadMore, setLoadMore] = useState(false);
 
+  const prevQueryRef = useRef('');
+  const prevPageRef = useRef(1);
+
   useEffect(() => {
-    if (query === '') {
+    if (
+      query === '' ||
+      (query === prevQueryRef.current && page === prevPageRef.current)
+    ) {
       return;
     }
 
     const fetchImages = async () => {
-      setLoading(true);
-      setStatus('pending');
-      setPage(1);
-
       try {
+        setImages(null);
+        setLoading(true);
+        setStatus('pending');
+        setPage(page);
+
         const response = await axios.get(
           `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
         );
@@ -46,7 +52,7 @@ export default function App() {
 
         if (hits.length === 0) {
           toast.error(`Ups...we have not ${query} images...`);
-          setImages(null);
+          setImages(hits);
           setStatus('rejected');
           setLoadMore(false);
           return;
@@ -56,8 +62,10 @@ export default function App() {
           setImages(hits);
           setStatus('resolved');
         } else {
-          setImages(prevImages => [...prevImages, ...hits]);
+          const newImages = [...images, ...hits];
+          setImages(newImages);
           setStatus('resolved');
+          setLoadMore(true);
         }
 
         if (response.data.totalHits > page * 12) {
@@ -77,21 +85,25 @@ export default function App() {
       setPage(1);
       setImages(null);
       setLoadMore(false);
-      fetchImages();
     }
 
     fetchImages();
-  }, [query, page]);
+    prevQueryRef.current = query;
+    prevPageRef.current = page;
+  }, [query, page, images]);
 
   const handleFormSubmit = query => {
+    setPage(1);
     setQuery(query);
     setLoading(false);
     setStatus('idle');
   };
 
   const handleLoadMoreClick = () => {
+    const nextPage = page + 1;
     setLoading(true);
-    setPage(prevPage => prevPage + 1);
+    setStatus('pending');
+    setPage(nextPage);
   };
 
   const handleImageClick = largeImageURL => {
@@ -100,50 +112,24 @@ export default function App() {
   };
 
   const handleCloseModal = () => {
+    setLargeImageURL('');
     setShowModal(false);
   };
 
-  if (status === 'idle') {
-    return <SearchForm onSubmit={handleFormSubmit} value={query} />;
-  }
-
-  if (status === 'pending' && images === null) {
-    return (
-      <>
-        <SearchForm onSubmit={handleFormSubmit} value={query} />
-        <LoadingPage>
-          <LoaderSpinner />
-        </LoadingPage>
-      </>
-    );
-  }
-
-  if (status === 'rejected') {
-    return (
-      <div>
-        <SearchForm onSubmit={handleFormSubmit} value={query} />
-        <ToastContainer autoClose={3000} />
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <SearchForm onSubmit={handleFormSubmit} value={query} />
-
+    <>
+      <SearchForm onSubmit={handleFormSubmit} />
       {images && <Gallery images={images} onImageClick={handleImageClick} />}
-
+      {loadMore && <LoadMoreButton onClick={handleLoadMoreClick} />}
+      {showModal && (
+        <Modal onClose={handleCloseModal} largeImageURL={largeImageURL} />
+      )}
       {loading && (
         <LoadingPage>
           <LoaderSpinner />
         </LoadingPage>
       )}
-
-      {loadMore && loading && <LoadMoreButton onClick={handleLoadMoreClick} />}
-
-      {showModal && (
-        <Modal onClose={handleCloseModal} largeImageURL={largeImageURL}></Modal>
-      )}
-    </div>
+      {status === 'rejected' && <ToastContainer autoClose={3000} />}
+    </>
   );
 }

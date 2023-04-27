@@ -4,7 +4,7 @@ import { GalleryList, GalleryImage } from './ImageGalleryStyle';
 export const Gallery = ({ images, onImageClick }) => {
   return (
     <GalleryList>
-      {images.map(({ id, webformatURL, tags, largeImageURL }) => (
+      {images.map(({ id, webformatURL, largeImageURL }) => (
         <li key={id} onClick={() => onImageClick(largeImageURL)}>
           <GalleryImage src={webformatURL} alt={id} />
         </li>
