@@ -33,7 +33,6 @@ export default function App() {
 
     const fetchImages = async () => {
       try {
-        setImages(null);
         setLoading(true);
         setStatus('pending');
         setPage(page);
@@ -83,7 +82,6 @@ export default function App() {
 
     if (query !== '') {
       setPage(1);
-      setImages(null);
       setLoadMore(false);
     }
 
